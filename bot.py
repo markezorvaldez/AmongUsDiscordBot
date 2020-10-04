@@ -14,15 +14,18 @@ with open('config.json', 'r') as f:
 
 bot = commands.Bot(command_prefix=config['prefix'])
 
-bot.code = None
+bot.codes = {}
 
 @bot.command(help='Gets or sets the Among Us game code')
 async def code(ctx, arg=None):
     if not arg:
-        await ctx.send(bot.code or "There is no code yet!")
+        if ctx.author.voice.channel.id in bot.codes:
+            await ctx.send('The Among Us code for this channel ({0}) is {1}'.format(ctx.author.voice.channel, bot.codes[ctx.author.voice.channel.id]))
+        else:
+            await ctx.send('There is no code for this channel ({}) yet!'.format(ctx.author.voice.channel))
     else:
-        bot.code = arg
-        await ctx.send("The code is set to %s" % bot.code)
+        bot.codes[ctx.author.voice.channel.id] = arg
+        await ctx.send('The Among Us code for this channel ({0}) is set to {1}'.format(ctx.author.voice.channel, arg))
 
 @bot.command(help='Mutes specified users')
 async def dead(ctx, members: commands.Greedy[discord.Member]):
@@ -37,10 +40,12 @@ async def alive(ctx, members: commands.Greedy[discord.Member]):
 @bot.command(help='Mutes everyone in the voice channel')
 async def muteall(ctx):
     await toggle_mute([await ctx.guild.fetch_member(id) for id in ctx.author.voice.channel.voice_states.keys()], "true")
-        
+    await ctx.send('Everyone in {} is now muted'.format(ctx.author.voice.channel))
+
 @bot.command(help='Unmutes everyone in the voice channel')
 async def unmuteall(ctx):
     await toggle_mute([await ctx.guild.fetch_member(id) for id in ctx.author.voice.channel.voice_states.keys()], "false")
+    await ctx.send('Everyone in {} is now unmuted'.format(ctx.author.voice.channel))
 
 async def toggle_mute(members, toggle):
     for member in members:
