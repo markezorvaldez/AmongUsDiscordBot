@@ -18,4 +18,14 @@ bot = commands.Bot(command_prefix=config['prefix'])
 async def print(ctx, *, arg):
     await ctx.send(arg)
 
+bot.code = None
+
+@bot.command(help='Gets or sets the Among Us game code')
+async def code(ctx, arg=None):
+    if not arg:
+        await ctx.send(bot.code or "There is no code yet!")
+    else:
+        bot.code = arg
+        await ctx.send("The code is set to %s" % bot.code)
+        
 bot.run(config['token'])
