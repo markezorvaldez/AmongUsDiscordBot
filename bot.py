@@ -1,6 +1,7 @@
+import asyncio
+import discord
 import json
 import logging
-import discord
 from discord.ext import commands
 
 logger = logging.getLogger('discord')
@@ -16,7 +17,7 @@ bot = commands.Bot(command_prefix=config['prefix'])
 
 bot.codes = {}
 
-@bot.command(help='Gets or sets the Among Us game code')
+@bot.command(help='Gets or sets the Among Us game code on the author\'s channel')
 async def code(ctx, arg=None):
     if not arg:
         if ctx.author.voice.channel.id in bot.codes:
@@ -48,7 +49,6 @@ async def unmuteall(ctx):
     await ctx.send('Everyone in {} is now unmuted'.format(ctx.author.voice.channel))
 
 async def toggle_mute(members, toggle):
-    for member in members:
-        await member.edit(mute=toggle,deafen=toggle)
+    await asyncio.gather(*[member.edit(mute=toggle,deafen=toggle) for member in members])
 
 bot.run(config['token'])
